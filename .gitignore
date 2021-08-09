@@ -1,3 +1,9 @@
 /master/nginx-html/*
 /slave_1/nginx-html/*
 /slave_2/nginx-html/*
+/master/nginx-log/*
+/slave_1/nginx-log/*
+/slave_2/nginx-log/*
+/master/php-log/*
+/slave_1/php-log/*
+/slave_2/php-log/*
