@@ -1,0 +1,115 @@
+version: "3"
+
+services:
+    php_master:
+        build:
+            context: ./php/${PHP_VERSION}
+            dockerfile: Dockerfile
+        container_name: php_master
+        restart: always
+        privileged: true
+        ports:
+            - "9000:9000"
+        volumes:
+            - ./master/nginx-html/${WEB_NAME}:/var/www/html
+            - ./master/php-log/${WEB_NAME}:/var/log/php-fpm
+            - ./master/php-config/php.ini:/usr/local/etc/php.ini
+            - ./master/php-config/php-fpm.conf:/usr/local/etc/php-fpm.conf
+            - ./master/php-config/php-fpm.d/www.conf:/usr/local/etc/php-fpm.d/www.conf
+        stdin_open: true
+        tty: true
+        networks:
+            default:
+                ipv4_address: 172.18.0.2
+    nginx_master:
+        image: ${NGINX_IMAGE_NAME}
+        container_name: nginx_master
+        restart: always
+        ports:
+            - "80:80"
+        links:
+            - "php_master:php_master"
+        volumes:
+            - ./master/nginx-config/nginx.conf:/etc/nginx/nginx.conf
+            - ./master/nginx-config/conf.d:/etc/nginx/conf.d
+            - ./master/nginx-log:/var/log/nginx
+            - ./master/nginx-html/${WEB_NAME}:/usr/share/nginx/html
+        networks:
+            default:
+                ipv4_address: 172.18.0.3
+    php_slave_1:
+        build:
+            context: ./php/${PHP_VERSION}
+            dockerfile: Dockerfile
+        container_name: php_slave_1
+        restart: always
+        privileged: true
+        ports:
+            - "9001:9000"
+        volumes:
+            - ./slave_1/nginx-html/${WEB_NAME}:/var/www/html
+            - ./slave_1/php-log/${WEB_NAME}:/var/log/php-fpm
+            - ./slave_1/php-config/php.ini:/usr/local/etc/php.ini
+            - ./slave_1/php-config/php-fpm.conf:/usr/local/etc/php-fpm.conf
+            - ./slave_1/php-config/php-fpm.d/www.conf:/usr/local/etc/php-fpm.d/www.conf
+        stdin_open: true
+        tty: true
+        networks:
+            default:
+                ipv4_address: 172.18.0.4
+    nginx_slave_1:
+        image: ${NGINX_IMAGE_NAME}
+        container_name: nginx_slave_1
+        restart: always
+        ports:
+            - "8080:80"
+        links:
+            - "php_slave_1:php_slave_1"
+        volumes:
+            - ./slave_1/nginx-config/nginx.conf:/etc/nginx/nginx.conf
+            - ./slave_1/nginx-config/conf.d:/etc/nginx/conf.d
+            - ./slave_1/nginx-log:/var/log/nginx
+            - ./slave_1/nginx-html/${WEB_NAME}:/usr/share/nginx/html
+        networks:
+            default:
+                ipv4_address: 172.18.0.5
+    php_slave_2:
+        build:
+            context: ./php/${PHP_VERSION}
+            dockerfile: Dockerfile
+        container_name: php_slave_2
+        restart: always
+        privileged: true
+        ports:
+            - "9002:9000"
+        volumes:
+            - ./slave_2/nginx-html/${WEB_NAME}:/var/www/html
+            - ./slave_2/php-log/${WEB_NAME}:/var/log/php-fpm
+            - ./slave_2/php-config/php.ini:/usr/local/etc/php.ini
+            - ./slave_2/php-config/php-fpm.conf:/usr/local/etc/php-fpm.conf
+            - ./slave_2/php-config/php-fpm.d/www.conf:/usr/local/etc/php-fpm.d/www.conf
+        stdin_open: true
+        tty: true
+        networks:
+            default:
+                ipv4_address: 172.18.0.6
+    nginx_slave_2:
+        image: ${NGINX_IMAGE_NAME}
+        container_name: nginx_slave_2
+        restart: always
+        ports:
+            - "8081:80"
+        links:
+            - "php_slave_2:php_slave_2"
+        volumes:
+            - ./slave_2/nginx-config/nginx.conf:/etc/nginx/nginx.conf
+            - ./slave_2/nginx-config/conf.d:/etc/nginx/conf.d
+            - ./slave_2/nginx-log:/var/log/nginx
+            - ./slave_2/nginx-html/${WEB_NAME}:/usr/share/nginx/html
+        networks:
+            default:
+                ipv4_address: 172.18.0.7
+networks:
+    default:
+        external:
+            name: network_1
